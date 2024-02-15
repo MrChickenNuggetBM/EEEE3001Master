@@ -212,7 +212,7 @@ bool loop()
     token->wait_for(std::chrono::seconds(10));
 
     // send bfp image to Node-RED Dashboard
-    token = publishImage("images/camera", cameraImage, CLIENT);
+    token = publishImage("images/backFocalPlane", cameraImage, CLIENT);
     token->wait_for(std::chrono::seconds(10));
 
     // set the duty cycle
