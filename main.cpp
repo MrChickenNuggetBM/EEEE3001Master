@@ -44,8 +44,8 @@ bool setup()
         return false;
     }
 
-    videoCapture.set(CAP_PROP_FRAME_WIDTH, 480);
-    videoCapture.set(CAP_PROP_FRAME_HEIGHT, 270);
+    videoCapture.set(CAP_PROP_FRAME_WIDTH, 960);
+    videoCapture.set(CAP_PROP_FRAME_HEIGHT, 540);
 
     // set the PWM signal
     if (gpioInitialise() < 0)
