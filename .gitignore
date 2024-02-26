@@ -6,6 +6,7 @@ bin/
 *.depend
 *.cbp
 *.layout
+*.cmd
 version.txt
 
 CMakeCache.txt
