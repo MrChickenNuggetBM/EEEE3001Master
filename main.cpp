@@ -201,25 +201,29 @@ bool loop()
     ellipse(ringImage);
     // cvtColor(ringImage, ringImageBW, COLOR_BGRA2GRAY);
 
+    // display image
+    screen.send(ringImage);
+    // send ring image to Node-RED Dashboard
+    auto token = publishImage("images/ring", ringImage, CLIENT);
+    token->wait_for(std::chrono::seconds(10));
+
     // detect two ellipses on the image (outer and inner ring)
     // vector<Ellipse> ellipses = detectEllipses(ringImageBW, 2);
     // cout << "I found: " << ellipses.size() << endl;
     // for (unsigned int i = 0; i < ellipses.size(); i++)
     //     ellipses[i](ringImage);
+    // imshow("hi", ringImage);
 
-    // send ring image to Node-RED Dashboard
-    auto token = publishImage("images/ring", ringImage, CLIENT);
-    token->wait_for(std::chrono::seconds(10));
 
     // send bfp image to Node-RED Dashboard
-    token = publishImage("images/backFocalPlane", cameraImage, CLIENT);
+    token = publishImage("images/imagePlane", cameraImage, CLIENT);
     token->wait_for(std::chrono::seconds(10));
 
     // set the duty cycle
     gpioPWM(PWM_PIN, _dutyCycle);
 
-    // imshow("hi", cameraImage);
-    screen.send(ringImage);
+
+
     return (waitKey(1) < 0);
 }
 

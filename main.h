@@ -14,7 +14,7 @@
 #include <chrono>
 #include <thread>
 
-#define PWM_PIN 12
+#define PWM_PIN 13
 
 using ullint = unsigned long long int;
 
