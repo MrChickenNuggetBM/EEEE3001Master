@@ -16,6 +16,8 @@ set(SOURCE_FILES_MAIN
 )
 file(GLOB SOURCE_FILES_H CONFIGURE_DEPENDS "include/*.h")
 file(GLOB SOURCE_FILES_CXX CONFIGURE_DEPENDS "src/*.cpp")
+file(GLOB SHARED_FILES_H CONFIGURE_DEPENDS "Shared/include/*.h")
+file(GLOB SHARED_FILES_CXX CONFIGURE_DEPENDS "Shared/src/*.cpp")
 
 include_directories("/usr/local/include")
 # Find OpenCV
@@ -47,5 +49,5 @@ message(STATUS ${PAHO_MQTT_C_LIB})
 message(STATUS ${PAHO_MQTT_AS_LIB})
 
 # Link OpenCV and Paho MQTT libraries
-add_executable(${PROJECT_NAME} ${SOURCE_FILES_MAIN} ${SOURCE_FILES_H} ${SOURCE_FILES_CXX}) # Executable target
+add_executable(${PROJECT_NAME} ${SOURCE_FILES_MAIN} ${SOURCE_FILES_H} ${SOURCE_FILES_CXX} ${SHARED_FILES_H} ${SHARED_FILES_CXX}) # Executable target
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${PIGPIO_LIBRARY} paho-mqttpp3 paho-mqtt3c)
