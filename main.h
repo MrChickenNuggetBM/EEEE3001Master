@@ -12,7 +12,7 @@
 #include <chrono>
 #include <thread>
 #include "include/Screen.h"
-#include "include/CV++.h"
+#include "Shared/include/CV++.h"
 
 namespace mqtt
 {
