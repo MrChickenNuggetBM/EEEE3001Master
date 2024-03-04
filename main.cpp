@@ -1,36 +1,40 @@
 #include "main.h"
 
-const string TOPICS[]  =
+// Callback for when a message arrives.
+void Callback::message_arrived(const_message_ptr msg)
 {
-    "parameters/xCenter",
-    "parameters/yCenter",
-    "parameters/xDiameter",
-    "parameters/yDiameter",
-    "parameters/thickness",
-    "parameters/isCircle",
-    "parameters/modality",
-    "parameters/isGUIControl",
-    "parameters/isGUIControl",
-    "brightness/isAutomaticBrightness",
-    "brightness/dutyCycle"
-};
+    using namespace topics;
 
-// mqtt broker definition
-const string SERVER_ADDRESS("mqtt://localhost:1883");
-async_client CLIENT(SERVER_ADDRESS, "raspberrypi");
+    string topic = msg->get_topic();
+    string payload = msg->to_string();
 
-// connection OPTIONS
-connect_options OPTIONS;
+    /*
+    cout << "Message arrived!" << endl;
+    cout << "\ttopic: '" << topic << "'" << endl;
+    cout << "\tpayload: '" << payload << "'\n" << endl;
+    */
 
-// callback
-Callback CALLBACK(CLIENT, OPTIONS, TOPICS, 11);
-
-// variable for screen
-Screen screen("/dev/fb1");
-// screen dimensions
-const int
-sWidth = screen.getWidth(),
-sHeight = screen.getHeight();
+    if (topic == "parameters/xCenter")
+        parameters::xCenter = std::stoi(payload);
+    else if (topic == "parameters/yCenter")
+        parameters::yCenter = std::stoi(payload);
+    else if (topic == "parameters/xDiameter")
+        parameters::xDiameter = std::stoi(payload);
+    else if (topic == "parameters/yDiameter")
+        parameters::yDiameter = std::stoi(payload);
+    else if (topic == "parameters/thickness")
+        parameters::thickness = std::stoi(payload);
+    else if (topic == "parameters/isCircle")
+        parameters::isCircle = (payload == "true");
+    else if (topic == "parameters/modality")
+        parameters::modality = std::stoi(payload);
+    else if (topic == "parameters/isGUIControl")
+        parameters::isGUIControl = (payload == "true");
+    else if (topic == "brightness/isAutomaticBrightness")
+        brightness::isAutomaticBrightness = (payload == "true");
+    else if (topic == "brightness/dutyCycle")
+        brightness::dutyCycle = std::stoi(payload);
+}
 
 bool setup()
 {
@@ -75,7 +79,7 @@ bool setup()
         auto connectToken = CLIENT.connect(OPTIONS, nullptr, CALLBACK);
         connectToken->wait_for(std::chrono::seconds(10));
     }
-    catch (const mqtt::exception& exc)
+    catch (const mqtt::exception &exc)
     {
         cerr << "\nERROR: Unable to connect to MQTT server: '"
              << SERVER_ADDRESS << "'" << exc << endl;
@@ -116,7 +120,7 @@ bool setup()
         token = publishMessage("brightness/dutyCycleSet", "50", CLIENT);
         token->wait_for(std::chrono::seconds(10));
     }
-    catch (const mqtt::exception& exc)
+    catch (const mqtt::exception &exc)
     {
         std::cerr << "Error during publish" << exc.what() << std::endl;
     }
@@ -179,24 +183,20 @@ bool loop()
     Ellipse ellipse(
         Point2f(
             960 + _xCenter,
-            540 + _yCenter
-        ),
+            540 + _yCenter),
         Size2f(
             _isCircle ? std::min(_xDiameter, _yDiameter) : _xDiameter,
-            _isCircle ? std::min(_xDiameter, _yDiameter) : _yDiameter
-        ),
+            _isCircle ? std::min(_xDiameter, _yDiameter) : _yDiameter),
         0,
         ringColour,
-        _thickness
-    );
+        _thickness);
 
     // define the ringImage frame
     Mat ringImage(
         1080,
         1920,
         CV_8UC4,
-        backgroundColour
-    );
+        backgroundColour);
     // put the ellipse in ringImage
     ellipse(ringImage);
 
@@ -226,7 +226,7 @@ void teardown()
 
     cout << "Stopping..." << endl;
 
-    Mat emptyFrame(1080, 1920, CV_8UC4, Scalar(0,0,0,255));
+    Mat emptyFrame(1080, 1920, CV_8UC4, Scalar(0, 0, 0, 255));
     screen.send(emptyFrame);
 
     gpioTerminate();
@@ -241,16 +241,11 @@ void teardown()
         CLIENT.disconnect()->wait();
         cout << "OK" << endl;
     }
-    catch (const mqtt::exception& exc)
+    catch (const mqtt::exception &exc)
     {
         cerr << exc << endl;
     }
 
     cout << endl
          << "Stopped after " << i << " frames" << endl;
-}
-
-void teardown(int signal)
-{
-    exit(EXIT_SUCCESS);
 }
