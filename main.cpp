@@ -196,10 +196,9 @@ bool loop()
         1920,
         CV_8UC4,
         backgroundColour
-    ), ringImageBW;
+    );
     // put the ellipse in ringImage
     ellipse(ringImage);
-    // cvtColor(ringImage, ringImageBW, COLOR_BGRA2GRAY);
 
     // display image
     screen.send(ringImage);
@@ -207,22 +206,16 @@ bool loop()
     auto token = publishImage("images/ring", ringImage, CLIENT);
     token->wait_for(std::chrono::seconds(10));
 
-    // detect two ellipses on the image (outer and inner ring)
-    // vector<Ellipse> ellipses = detectEllipses(ringImageBW, 2);
-    // cout << "I found: " << ellipses.size() << endl;
-    // for (unsigned int i = 0; i < ellipses.size(); i++)
-    //     ellipses[i](ringImage);
-    // imshow("hi", ringImage);
-
-
     // send bfp image to Node-RED Dashboard
     token = publishImage("images/imagePlane", cameraImage, CLIENT);
     token->wait_for(std::chrono::seconds(10));
 
+    // detect two ellipses on the image (outer and inner ring)
+    // vector<Ellipse> ellipses = detectEllipses(cameraImage.clone(), 2);
+    // cout << "I found: " << ellipses.size() << endl;
+
     // set the duty cycle
     gpioPWM(PWM_PIN, _dutyCycle);
-
-
 
     return (waitKey(1) < 0);
 }

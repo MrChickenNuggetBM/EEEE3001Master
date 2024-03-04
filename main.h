@@ -1,10 +1,9 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#include "include/Ellipse.h"
 #include "include/Screen.h"
 #include "include/MQTT++.h"
-#include "include/HoughTransform.h"
+#include "include/CV++.h"
 #include <pigpio.h>
 #include <iostream>
 #include <termios.h>

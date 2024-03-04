@@ -121,7 +121,7 @@ public:
     PaddedMat& operator=(const PaddedMat& other);
 
 private:
-    cv::Mat pad(const cv::Mat& mat)
+    cv::Mat pad(const cv::Mat& mat);
 };
 
 std::vector<Ellipse> detectEllipses(cv::Mat src, unsigned int numEllipses = 1, int minimizedSize = 64);
