@@ -30,12 +30,24 @@ Ellipse &Ellipse::operator=(const Ellipse &assignedEllipse)
 }
 
 // gets
-Scalar Ellipse::getColour() const { return colour; }
-int Ellipse::getThickness() const { return thickness; }
+Scalar Ellipse::getColour() const
+{
+    return colour;
+}
+int Ellipse::getThickness() const
+{
+    return thickness;
+}
 
-float Ellipse::getMinorAxis() const { return (size.height); }
+float Ellipse::getMinorAxis() const
+{
+    return (size.height);
+}
 
-float Ellipse::getMajorAxis() const { return (size.width); }
+float Ellipse::getMajorAxis() const
+{
+    return (size.width);
+}
 
 float Ellipse::getEccentricity() const
 {
@@ -48,9 +60,15 @@ float Ellipse::getEccentricity() const
     return ((float)sqrt(1 - (sqrMinRad / sqrMajRad)));
 }
 
-Size2f Ellipse::getCenter() const { return (center); }
+Size2f Ellipse::getCenter() const
+{
+    return (center);
+}
 
-float Ellipse::getArea() const { return ((float)(CV_PI * getMinorAxis() * getMajorAxis() / 4)); }
+float Ellipse::getArea() const
+{
+    return ((float)(CV_PI * getMinorAxis() * getMajorAxis() / 4));
+}
 
 void Ellipse::setColour(const Scalar &newColour)
 {
@@ -91,19 +109,34 @@ void Ellipse::setColour(const Scalar &newColour)
     }
 }
 
-void Ellipse::setThickness(const int &newThickness) { thickness = newThickness; }
+void Ellipse::setThickness(const int &newThickness)
+{
+    thickness = newThickness;
+}
 
-void Ellipse::setMinorAxis(float newMinorAxis) { size.width = newMinorAxis; }
+void Ellipse::setMinorAxis(float newMinorAxis)
+{
+    size.width = newMinorAxis;
+}
 
-void Ellipse::setMajorAxis(float newMajorAxis) { size.height = newMajorAxis; }
+void Ellipse::setMajorAxis(float newMajorAxis)
+{
+    size.height = newMajorAxis;
+}
 
 void Ellipse::setCenter(float newX, float newY)
 {
     center.x = newX;
     center.y = newY;
 }
-void Ellipse::setCenterX(float newX) { center.x = newX; }
-void Ellipse::setCenterY(float newY) { center.y = newY; }
+void Ellipse::setCenterX(float newX)
+{
+    center.x = newX;
+}
+void Ellipse::setCenterY(float newY)
+{
+    center.y = newY;
+}
 
 bool Ellipse::isPointInside(const Point2f &point) const
 {
@@ -118,31 +151,49 @@ bool Ellipse::isPointInside(const Point2f &point) const
     return ((xDiff * xDiff) / (a * a) + (yDiff * yDiff) / (b * b) <= 1.0f);
 }
 
-bool Ellipse::isCircle() const { return (getEccentricity() <= 0.2f); }
+bool Ellipse::isCircle() const
+{
+    return (getEccentricity() <= 0.2f);
+}
 
 void Ellipse::translate(float xTranslation, float yTranslation)
 {
     center.x += xTranslation;
     center.y += yTranslation;
 }
-void Ellipse::operator+(float xyTranslation) { translate(xyTranslation, xyTranslation); }
+void Ellipse::operator+(float xyTranslation)
+{
+    translate(xyTranslation, xyTranslation);
+}
 
 void Ellipse::scale(float xScale, float yScale)
 {
     size.width *= xScale;
     size.height *= yScale;
 }
-void Ellipse::operator*(float xyScale) { scale(xyScale, xyScale); }
+void Ellipse::operator*(float xyScale)
+{
+    scale(xyScale, xyScale);
+}
 
-void Ellipse::rotate(float angleDeg) { angle += angleDeg; }
-void Ellipse::rotateRad(float angleRad) { rotate((float)(angleRad * 180 / CV_PI)); }
+void Ellipse::rotate(float angleDeg)
+{
+    angle += angleDeg;
+}
+void Ellipse::rotateRad(float angleRad)
+{
+    rotate((float)(angleRad * 180 / CV_PI));
+}
 
 void Ellipse::draw(const Mat &frame) const
 {
     ellipse(frame, *this, colour, thickness);
 }
 
-void Ellipse::operator()(const Mat &frame) const { draw(frame); }
+void Ellipse::operator()(const Mat &frame) const
+{
+    draw(frame);
+}
 
 /* This following block of code has been modified from https://github.com/siamezzze/ellipse_detection -----------------------------------------------
 
@@ -278,8 +329,8 @@ void voting(vector<pair<ellipse_data, int>> &ellipses, const vector<vector<short
         for (int x = xbounds.first; x < xbounds.second; x++) // point of the ellipse (x,y)
         {
             if (((x == x1) && (y == y1)) ||
-                ((x == x2) && (y == y2)) ||
-                (data[y][x] == 0)) // the same as one of the side points or not a boundary point
+                    ((x == x2) && (y == y2)) ||
+                    (data[y][x] == 0)) // the same as one of the side points or not a boundary point
                 continue;
 
             double d_sq = distance_square(x, y, x0, y0);
@@ -348,7 +399,7 @@ vector<pair<ellipse_data, int>> hough_transform(vector<vector<short>> &data, int
                 for (int x2 = xbounds.first; x2 < xbounds.second; x2++) // point (x2, y2) - side point of major axis
                 {
                     if (((y2 == y1) && (x2 <= x1)) ||
-                        (data[y2][x2] == 0)) // already been selected OR not a boundary point
+                            (data[y2][x2] == 0)) // already been selected OR not a boundary point
                         continue;
 
                     voting(res, data, xbounds, ybounds, min_dist, min_vote, make_pair(x1, y1), make_pair(x2, y2));
@@ -462,16 +513,16 @@ vector<ellipse_data> detect_ellipses(Mat src, int minimized_size = 64, unsigned 
 }
 
 ellipse_data::ellipse_data(int _x0, int _y0, double _a, double _b, double th) : a(_a), b(_b),
-                                                                                x0(_x0), y0(_y0),
-                                                                                orient(th)
+    x0(_x0), y0(_y0),
+    orient(th)
 {
 }
 
 ellipse_data::ellipse_data(int _x0, int _y0, double _a, double _b, double th, int _x1, int _y1, int _x2, int _y2) : a(_a), b(_b),
-                                                                                                                    x0(_x0), y0(_y0),
-                                                                                                                    x1(_x1), y1(_y1),
-                                                                                                                    x2(_x2), y2(_y2),
-                                                                                                                    orient(th)
+    x0(_x0), y0(_y0),
+    x1(_x1), y1(_y1),
+    x2(_x2), y2(_y2),
+    orient(th)
 {
 }
 
@@ -489,7 +540,7 @@ PaddedMat::PaddedMat(const PaddedMat &other) : Mat(other)
     colDiff = other.colDiff;
 }
 
-PaddedMat::PaddedMat &operator=(const PaddedMat &other)
+PaddedMat &PaddedMat::operator=(const PaddedMat &other)
 {
     if (this != &other)
     {
@@ -520,23 +571,27 @@ Mat PaddedMat::pad(const Mat &mat)
  */
 vector<Ellipse> detectEllipses(Mat src, unsigned int numEllipses, int minimizedSize)
 {
+    // format the image
+    const int k1 = 2;
+    cvtColor(src, src, COLOR_BGRA2GRAY);imshow("hi", src);
+    threshold(src, src, 125, 255, THRESH_BINARY);
+    Mat kernel1 = getStructuringElement(MORPH_RECT, Size(k1, k1)); // Adjust kernel size as needed
+    morphologyEx(src, src, MORPH_OPEN, kernel1);
+
     // add padding to image to make square with length of power of two
     PaddedMat padsrc(src);
 
-    // format the image
-    const int k1 = 2;
-    threshold(padsrc, padsrc, 75, 255, THRESH_BINARY);
-    Mat kernel1 = getStructuringElement(MORPH_RECT, Size(k1, k1)); // Adjust kernel size as needed
-    morphologyEx(padsrc, padsrc, MORPH_OPEN, kernel1);
+    imshow("hi2", padsrc);
 
     // get the ellipses
     vector<Ellipse> ellipses;
     ellipses.reserve(numEllipses);
 
-    auto preEllipses = detect_ellipses(
-        padsrc,
-        minimizedSize,
-        numEllipses);
+
+    /* auto preEllipses = detect_ellipses(
+                           padsrc,
+                           minimizedSize,
+                           numEllipses);
 
     // convert to Ellipse
     for (unsigned int i = 0; i < numEllipses; i++)
@@ -555,6 +610,11 @@ vector<Ellipse> detectEllipses(Mat src, unsigned int numEllipses, int minimizedS
                 Scalar(255, 0, 0, 255),
                 5));
     }
+
+    for (unsigned int i = 0; i < ellipses.size(); i++)
+        ellipses[i](src);
+    imshow("hi", src);
+    */
 
     return ellipses;
 }
