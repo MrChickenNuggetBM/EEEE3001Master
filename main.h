@@ -12,7 +12,12 @@
 #include <chrono>
 #include <thread>
 #include "include/Screen.h"
-#include "include/CV++.h"
+Screen screen("/dev/fb1");
+
+int  sWidth = screen.getWidth ();
+int sHeight = screen.getHeight();
+
+#include "Shared/include/CV++.h"
 
 namespace mqtt
 {
