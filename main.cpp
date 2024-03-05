@@ -90,34 +90,34 @@ bool setup()
     try
     {
         using namespace topics::parameters;
-        auto token = publishMessage("parameters/xCenterSet", "0", CLIENT);
+        auto token = publishMessage("parameters/xCenterSet", to_string(topics::parameters::xCenter));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/yCenterSet", "0", CLIENT);
+        token = publishMessage("parameters/yCenterSet", to_string(topics::parameters::yCenter));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/xDiameterSet", "33", CLIENT);
+        token = publishMessage("parameters/xDiameterSet", to_string(topics::parameters::xDiameter));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/yDiameterSet", "60", CLIENT);
+        token = publishMessage("parameters/yDiameterSet", to_string(topics::parameters::yDiameter));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/thicknessSet", "150", CLIENT);
+        token = publishMessage("parameters/thicknessSet", to_string(topics::parameters::thickness));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/isCircleSet", "false", CLIENT);
+        token = publishMessage("parameters/isCircleSet", to_string(topics::parameters::isCircle));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/modalitySet", "0", CLIENT);
+        token = publishMessage("parameters/modalitySet", to_string(topics::parameters::modality));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("parameters/isGUIControlSet", "false", CLIENT);
+        token = publishMessage("parameters/isGUIControlSet", to_string(topics::parameters::isGUIControl));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("brightness/isAutomaticBrightnessSet", "true", CLIENT);
+        token = publishMessage("brightness/isAutomaticBrightnessSet", to_string(topics::brightness::isAutomaticBrightness));
         token->wait_for(std::chrono::seconds(10));
 
-        token = publishMessage("brightness/dutyCycleSet", "50", CLIENT);
+        token = publishMessage("brightness/dutyCycleSet", to_string(topics::brightness::dutyCycle));
         token->wait_for(std::chrono::seconds(10));
     }
     catch (const mqtt::exception &exc)
@@ -203,11 +203,11 @@ bool loop()
     // display image
     screen.send(ringImage);
     // send ring image to Node-RED Dashboard
-    auto token = publishImage("images/ring", ringImage, CLIENT);
+    auto token = publishImage("images/ring", ringImage);
     token->wait_for(std::chrono::seconds(10));
 
     // send bfp image to Node-RED Dashboard
-    token = publishImage("images/imagePlane", cameraImage, CLIENT);
+    token = publishImage("images/imagePlane", cameraImage);
     token->wait_for(std::chrono::seconds(10));
 
     // detect two ellipses on the image (outer and inner ring)
