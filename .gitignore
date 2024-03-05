@@ -5,3 +5,5 @@ bin/
 *.depend
 *.cbp
 *.layout
+
+*.cmake
