@@ -52,6 +52,13 @@ void Callback::message_arrived(const_message_ptr msg)
         cv::isPauseRendering = (payload == "true");
 }
 
+int _brightness = 55,
+    contrast = 50,
+    saturation = 67,
+    sharpness = 50,
+    exposure = 625,
+    gain = 500000;
+
 bool setup()
 {
     // clear the terminal
@@ -148,21 +155,15 @@ bool setup()
         std::cerr << "Error during publish" << exc.what() << std::endl;
     }
 
-    const float _brightness = 0.55,
-              contrast = 0.50,
-              saturation = 0.67;
+    namedWindow("Camera Settings", WINDOW_AUTOSIZE);
 
-    // set camera image settings
-    cout << "brightness: " << _brightness << endl;
-    videoCapture.set(CAP_PROP_BRIGHTNESS, _brightness);
-    cout << "contrast: " << contrast << endl;
-    videoCapture.set(CAP_PROP_CONTRAST, contrast);
-    cout << "saturation: " << saturation << endl;
-    videoCapture.set(CAP_PROP_SATURATION, saturation);
-
-    // set camera settings
-    system("v4l2-ctl -c exposure_dynamic_framerate=1");
-    system("v4l2-ctl -c scene_mode=8");
+    // Create trackbars for adjusting settings
+    createTrackbar("Brightness", "Camera Settings", &_brightness, 100);
+    createTrackbar("Contrast", "Camera Settings", &contrast, 100);
+    createTrackbar("Saturation", "Camera Settings", &saturation, 100);
+    createTrackbar("Sharpness", "Camera Settings", &sharpness, 100);
+    createTrackbar("Exposure", "Camera Settings", &exposure, 10000);
+    createTrackbar("Gain", "Camera Settings", &gain, 1000000);
 
     return true;
 }
@@ -173,7 +174,7 @@ bool loop()
 
     // replace default values
     static int
-    _xCenter   = parameters::xCenter * sWidth  / 100, _yCenter = parameters::yCenter * sHeight  / 100,
+    _xCenter   = parameters::xCenter * sWidth  / 100, _yCenter = parameters::xCenter * sWidth  / 100,
     _xDiameter = sWidth  * parameters::xDiameter / 100,
     _yDiameter = sHeight * parameters::yDiameter / 100,
     _thickness = parameters::thickness,
@@ -185,7 +186,7 @@ bool loop()
     _isCircle  = parameters::isCircle;
 
     // define default colours
-    Scalar
+    static Scalar
     backgroundColour = Scalar(0, 0, 0, 0),
     ringColour = Scalar(255, 255, 255, 255);
 
@@ -198,12 +199,11 @@ bool loop()
             using namespace topics::parameters;
             // percentage
             _xCenter   = xCenter   * sWidth  / 100;
-            _yCenter   = yCenter   * sHeight  / 100;
+            _yCenter   = xCenter   * sWidth  / 100;
             _xDiameter = xDiameter * sWidth  / 100;
             _yDiameter = yDiameter * sHeight / 100;
             _thickness = thickness;
             _isCircle  = isCircle;
-            _angle     = angle;
         }
         // if new cv parameters from Slave
         // do computer vision -----------------------
@@ -232,9 +232,7 @@ bool loop()
             ringColour = Scalar(0, 0, 0, 0);
         case 1:
             _thickness = -1;
-            break;
         case 0:
-            _thickness = parameters::thickness;
             break;
         }
     }
@@ -272,6 +270,27 @@ bool loop()
     token->wait_for(std::chrono::seconds(10));
 
     // send image plane image to Node-RED Dashboard
+    float
+    _brightness_ = (float)_brightness / 100.0,
+    contrast_ = (float)contrast / 100.0,
+    saturation_ = (float)saturation / 100.0,
+    sharpness_ = (float)sharpness / 100.0,
+    exposure_ = (float)exposure/* / 10000*/,
+    gain_ = (float)gain / 1000000;
+
+    cout << "brightness: " << _brightness_ << endl;
+    videoCapture.set(CAP_PROP_BRIGHTNESS, _brightness_);
+    cout << "contrast: " << contrast_ << endl;
+    videoCapture.set(CAP_PROP_CONTRAST, contrast_);
+    cout << "saturation: " << saturation_ << endl;
+    videoCapture.set(CAP_PROP_SATURATION, saturation_);
+    // cout << "sharpness: " << endl;
+    // videoCapture.set(CAP_PROP_SHARPNESS, sharpness_);
+    cout << "exposure: " << exposure_ << endl;
+    // videoCapture.set(CAP_PROP_EXPOSURE, exposure_);
+    cout << "gain: " << gain_ << endl;
+    videoCapture.set(CAP_PROP_GAIN, gain_);
+
     Mat cameraImage;
     videoCapture.read(cameraImage);
     token = publishImage("images/imagePlane", cameraImage);
@@ -296,8 +315,8 @@ void teardown()
 
     cout << "Stopping..." << endl;
 
-    Mat emptyFrame(1080, 1920, CV_8UC4, Scalar(0, 0, 0, 255));
-    screen.send(emptyFrame);
+    //Mat emptyFrame(1080, 1920, CV_8UC4, Scalar(0, 0, 0, 255));
+    //screen.send(emptyFrame);
 
     gpioTerminate();
 

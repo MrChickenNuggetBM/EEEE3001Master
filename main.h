@@ -1,7 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#define PWM_PIN 13
+#define PWM_PIN 18
 
 #include <pigpio.h>
 #include <iostream>
@@ -31,9 +31,17 @@ const string TOPICS[] =
     "parameters/thickness",
     "parameters/isCircle",
     "parameters/modality",
+    "parameters/angle",
     "parameters/isGUIControl",
     "brightness/isAutomaticBrightness",
-    "brightness/dutyCycle"
+    "brightness/dutyCycle",
+    "cv/x-correction",
+    "cv/y-correction",
+    "cv/angle-correction",
+    "cv/minRad-correction",
+    "cv/majRad-correction",
+    "cv/isNewValues",
+    "cv/isPauseRendering"
 };
 const int numTopics = sizeof(TOPICS)/sizeof(string);
 

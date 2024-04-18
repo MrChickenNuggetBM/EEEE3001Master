@@ -34,6 +34,7 @@ public:
 
     // send image data to the screen
     void send(cv::Mat& image) const;
+    void sendSlow(cv::Mat& image) const;
 };
 
 #endif // SCREEN_HPP
