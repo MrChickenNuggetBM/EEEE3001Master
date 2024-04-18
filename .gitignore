@@ -1,6 +1,7 @@
 .idea/
 obj/
 bin/
+Shared/
 
 *.depend
 *.cbp
