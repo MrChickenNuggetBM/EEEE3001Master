@@ -12,16 +12,21 @@
 #include <chrono>
 #include <thread>
 #include "include/Screen.h"
+#include "Shared/include/CV++.h"
+
 Screen screen("/dev/fb1");
 
-int  sWidth = screen.getWidth ();
-int sHeight = screen.getHeight();
+int  sWidth = 3840; // screen.getWidth ();
+int sHeight = 2400; // screen.getHeight();
 
-#include "Shared/include/CV++.h"
+using namespace std;
+using namespace mqtt;
+using namespace cv;
 
 namespace mqtt
 {
 // defining useful constants
+// the topics to subscribe to on the MQTT broker
 const string TOPICS[] =
 {
     "parameters/xCenter",
@@ -54,11 +59,8 @@ connect_options OPTIONS;
 Callback CALLBACK(CLIENT, OPTIONS, TOPICS, numTopics);
 }
 
+// stores the loop number
 using ullint = unsigned long long int;
-
-using namespace std;
-using namespace mqtt;
-using namespace cv;
 
 VideoCapture videoCapture(0);
 

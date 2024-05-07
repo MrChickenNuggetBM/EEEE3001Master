@@ -55,7 +55,7 @@ void Screen::send(Mat &image) const
         throw std::runtime_error("Error: Unable to open framebuffer device.");
 
     frameBuffer.write(reinterpret_cast<char *>(image.data), static_cast<streamsize>(image.total() * image.elemSize()));
-    // frameBuffer.write(reinterpret_cast<char *>(image.data), static_cast<streamsize>(image.total() * image.elemSize()));
+    frameBuffer.write(reinterpret_cast<char *>(image.data), static_cast<streamsize>(image.total() * image.elemSize()));
 
     frameBuffer.close();
 }

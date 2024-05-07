@@ -3,8 +3,7 @@
 // Callback for when a message arrives.
 void Callback::message_arrived(const_message_ptr msg)
 {
-    using namespace topics;
-
+    // extract the topic and the payload
     string topic = msg->get_topic();
     string payload = msg->to_string();
 
@@ -14,6 +13,9 @@ void Callback::message_arrived(const_message_ptr msg)
     cout << "\tpayload: '" << payload << "'\n" << endl;
     */
 
+    using namespace topics;
+    // define what to do when a particular message is published to the MQTT broker
+    // using a particular topic
     if (topic == "parameters/xCenter")
         parameters::xCenter = std::stoi(payload);
     else if (topic == "parameters/yCenter")
@@ -54,18 +56,36 @@ void Callback::message_arrived(const_message_ptr msg)
 
 bool setup()
 {
-    // clear the terminal
+    // clear the terminal from the cursor
     system("setterm -cursor off;clear");
 
     // set up the camera
-    //if (!videoCapture.isOpened())
-    //{
-    //    cerr << "Error: Could not open camera" << endl;
-    //    return false;
-    //}
+    if (!videoCapture.isOpened())
+    {
+        cerr << "Error: Could not open camera" << endl;
+        return false;
+    }
 
-    //videoCapture.set(CAP_PROP_FRAME_WIDTH, 960);
-    //videoCapture.set(CAP_PROP_FRAME_HEIGHT, 540);
+    // set camera image constants
+    const float _brightness = 0.55,
+                contrast = 0.50,
+                saturation = 0.67;
+
+
+    cout << "brightness: " << _brightness << endl;
+    cout << "contrast: " << contrast << endl;
+    cout << "saturation: " << saturation << endl;
+
+    // set camera image settings
+    videoCapture.set(CAP_PROP_FRAME_WIDTH, 960);
+    videoCapture.set(CAP_PROP_FRAME_HEIGHT, 540);
+    videoCapture.set(CAP_PROP_BRIGHTNESS, _brightness);
+    videoCapture.set(CAP_PROP_CONTRAST, contrast);
+    videoCapture.set(CAP_PROP_SATURATION, saturation);
+
+    // set camera settings
+    system("v4l2-ctl -c exposure_dynamic_framerate=1");
+    system("v4l2-ctl -c scene_mode=8");
 
     // set the PWM signal
     if (gpioInitialise() < 0)
@@ -80,15 +100,13 @@ bool setup()
     signal(SIGINT, teardown);
 
     // establish broker-client connection
-
     OPTIONS.set_clean_session(false);
 
     // Install the callback(s) before connecting.
-
     CLIENT.set_callback(CALLBACK);
 
     // Start the connection.
-    // When completed, the callback will subscribe to topic.
+    // When completed, the callback will subscribe to the topics
     try
     {
         cout << "Connecting to the MQTT server..." << flush;
@@ -148,22 +166,6 @@ bool setup()
         std::cerr << "Error during publish" << exc.what() << std::endl;
     }
 
-    const float _brightness = 0.55,
-              contrast = 0.50,
-              saturation = 0.67;
-
-    // set camera image settings
-    cout << "brightness: " << _brightness << endl;
-    videoCapture.set(CAP_PROP_BRIGHTNESS, _brightness);
-    cout << "contrast: " << contrast << endl;
-    videoCapture.set(CAP_PROP_CONTRAST, contrast);
-    cout << "saturation: " << saturation << endl;
-    videoCapture.set(CAP_PROP_SATURATION, saturation);
-
-    // set camera settings
-    system("v4l2-ctl -c exposure_dynamic_framerate=1");
-    system("v4l2-ctl -c scene_mode=8");
-
     return true;
 }
 
@@ -171,7 +173,7 @@ bool loop()
 {
     using namespace topics;
 
-    // replace default values
+    // define default parameters
     static int
     _xCenter   = parameters::xCenter * sWidth  / 100, _yCenter = parameters::yCenter * sHeight  / 100,
     _xDiameter = sWidth  * parameters::xDiameter / 100,
@@ -184,7 +186,7 @@ bool loop()
     static bool
     _isCircle  = parameters::isCircle;
 
-    // define default colours
+    // define default colours for foreground and background
     Scalar
     backgroundColour = Scalar(0, 0, 0, 0),
     ringColour = Scalar(255, 255, 255, 255);
@@ -211,13 +213,15 @@ bool loop()
         {
             using namespace topics::cv;
 
-            const float pixelRatio = 1;
+            // after multiplying by pixel ratio, apply the corrections
+            const float pixelRatioW = 0.0853;
+            const float pixelRatioH = 0.1;
 
             _angle     += angleCorrection;
-            _xCenter   += (int)(pixelRatio * xCorrection);
-            _yCenter   += (int)(pixelRatio * yCorrection);
-            _xDiameter += (int)(pixelRatio * majRadCorrection);
-            _yDiameter += (int)(pixelRatio * minRadCorrection);
+            _xCenter   += (int)(pixelRatioW * xCorrection);
+            _yCenter   += (int)(pixelRatioH * yCorrection);
+            _xDiameter += (int)(pixelRatioW * majRadCorrection);
+            _yDiameter += (int)(pixelRatioH * minRadCorrection);
 
             topics::cv::isNewValues = false;
         }
@@ -244,11 +248,11 @@ bool loop()
     if (!topics::brightness::isAutomaticBrightness)
         _dutyCycle = topics::brightness::dutyCycle;
 
-    // define the ellipse
+    // define the ellipse according to parameters
     Ellipse ellipse(
         Point2f(
-            640 + _xCenter,
-            1200 + _yCenter),
+            (sWidth / 2) + _xCenter,
+            (sHeight / 2) + _yCenter),
         Size2f(
             _isCircle ? std::min(_xDiameter, _yDiameter) : _xDiameter,
             _isCircle ? std::min(_xDiameter, _yDiameter) : _yDiameter),
@@ -256,33 +260,28 @@ bool loop()
         ringColour,
         _thickness);
 
-    // define the ringImage frame
+    // get an empty ring image
     Mat ringImage(
-        2400,
-        1280,
+        sHeight,
+        sWidth,
         CV_8UC4,
         backgroundColour);
     // put the ellipse in ringImage
     ellipse(ringImage);
 
-    // display image
-    screen.send(ringImage);
     // send ring image to Node-RED Dashboard
     auto token = publishImage("images/ring", ringImage);
     token->wait_for(std::chrono::seconds(10));
+
+    // display image
+    resize(ringImage, ringImage, Size(1280,2400), INTER_LINEAR);
+    screen.send(ringImage);
 
     // send image plane image to Node-RED Dashboard
     Mat cameraImage;
     videoCapture.read(cameraImage);
     token = publishImage("images/imagePlane", cameraImage);
     token->wait_for(std::chrono::seconds(10));
-
-    imshow("Camera Settings", cameraImage);
-
-
-    // detect two ellipses on the image (outer and inner ring)
-    // vector<Ellipse> ellipses = detectEllipses(cameraImage.clone(), 2);
-    // cout << "I found: " << ellipses.size() << endl;
 
     // set the duty cycle
     gpioPWM(PWM_PIN, _dutyCycle);
@@ -292,19 +291,25 @@ bool loop()
 
 void teardown()
 {
+    // put the cursor back on the CLI
     system("setterm -cursor on");
 
     cout << "Stopping..." << endl;
 
-    Mat emptyFrame(1080, 1920, CV_8UC4, Scalar(0, 0, 0, 255));
+    // send a black image to screen
+    Mat emptyFrame(1280, 2400, CV_8UC4, Scalar(0, 0, 0, 255));
     screen.send(emptyFrame);
 
+    // disable interfacing to pins
     gpioTerminate();
 
-    //videoCapture.release();
-    destroyAllWindows();
+    // release the camera
+    videoCapture.release();
 
-    // Disconnect
+    // close any windows
+    // destroyAllWindows();
+
+    // Disconnect from MQTT
     try
     {
         cout << "\nDisconnecting from the MQTT server..." << flush;
