@@ -77,8 +77,8 @@ bool setup()
     cout << "saturation: " << saturation << endl;
 
     // set camera image settings
-    videoCapture.set(CAP_PROP_FRAME_WIDTH, 960);
-    videoCapture.set(CAP_PROP_FRAME_HEIGHT, 540);
+    videoCapture.set(CAP_PROP_FRAME_WIDTH, 480);
+    videoCapture.set(CAP_PROP_FRAME_HEIGHT, 270);
     videoCapture.set(CAP_PROP_BRIGHTNESS, _brightness);
     videoCapture.set(CAP_PROP_CONTRAST, contrast);
     videoCapture.set(CAP_PROP_SATURATION, saturation);
